@@ -31,6 +31,11 @@ json_encode = json.JSONEncoder(indent=4).encode
 
 csrf_protect_m = method_decorator(csrf_protect)
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 class LockableAdminMixin(object):
 
