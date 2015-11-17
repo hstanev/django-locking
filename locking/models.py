@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.db import models
 
@@ -145,7 +145,7 @@ class Lock(models.Model):
         """
         if not isinstance(self.locked_at, datetime):
             return False
-        return datetime.now() < self.lock_expiration_time
+        return datetime.now(timezone.utc) < self.lock_expiration_time
 
 
     @property
@@ -172,7 +172,7 @@ class Lock(models.Model):
         """
         if not self.locked_at:
             return 0
-        locked_delta = datetime.now() - self.locked_at
+        locked_delta = datetime.now(timezone.utc) - self.locked_at
         # If the lock has already expired, there are 0 seconds remaining
         if locking_settings.TIME_UNTIL_EXPIRATION < locked_delta:
             return 0
@@ -211,7 +211,7 @@ class Lock(models.Model):
             else:
                 raise ObjectLockedError("This object is already locked by another"
                     " user. May not override, except through the `unlock` method.")
-        locked_at = datetime.now()
+        locked_at = datetime.now(timezone.utc)
         if lock_duration:
             locked_at += lock_duration - locking_settings.TIME_UNTIL_EXPIRATION
         self._locked_at = locked_at
