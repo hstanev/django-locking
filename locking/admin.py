@@ -70,10 +70,7 @@ class LockableAdminMixin(object):
             admin:%(app_label)s_%(object_name)s_lock_status
             admin:%(app_label)s_%(object_name)s_lock_js
         """
-        try:
-            from django.conf.urls.defaults import patterns, url
-        except ImportError:
-            from django.conf.urls import patterns, url
+        from django.conf.urls import url
 
         def wrap(view):
             curried_view = curry(view, self)
@@ -84,7 +81,7 @@ class LockableAdminMixin(object):
         opts = self.model._meta
         info = (opts.app_label, getattr(opts, 'model_name', None) or getattr(opts, 'module_name', None))
 
-        urlpatterns = patterns('',
+        urlpatterns = [
             url(r'^(.+)/locking_variables\.js$',
                 wrap(locking_views.locking_js),
                 name="%s_%s_lock_js" % info),
@@ -99,7 +96,8 @@ class LockableAdminMixin(object):
                 name="%s_%s_lock_remove" % info),
             url(r'^(.+)/lock_status/$',
                 wrap(locking_views.lock_status),
-                name="%s_%s_lock_status" % info))
+                name="%s_%s_lock_status" % info)
+        ]
         urlpatterns += super(LockableAdminMixin, self).get_urls()
         return urlpatterns
 
